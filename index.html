@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todos Application</title>
+    <style>
+        
+        button {
+            background: rgb(15, 59, 155);
+            height: 32px;
+            padding: 6px;
+            color: white;
+        }
+
+        input[type="text"] {
+            height: 26px;
+            min-width: 240px;
+        }
+
+        li {
+            border-bottom: 1px solid #AAA;
+            padding: 8px;
+            list-style-type: none;
+        }
+
+        li.highlighted {
+            background: lightgray;
+        }
+
+        input[type="checkbox"] {
+            margin: 16px 16px 16px 0;
+        }
+
+
+    </style>
+</head>
+<body>
+<div>
+    <input type="text" id="todo" placeholder="Do homework!">
+    <button id="add">Add Item</button>
+    <button id="remove">Remove Items</button>
+    <button id="highlight">Toggle Highlight</button>
+    <button id="sort">Sort Items</button>
+
+    <hr />
+
+    <ul id="todos">
+
+    </ul>
+
+    <!-- 
+        You need to add below JavaScript code in separate file <script.js> as mentioned in the assignment
+        and uncomment this below line so that script can be accessed from external file.
+        <script src="/script.js"></script> 
+    -->
+</div>
+<script>
+
+    var todoEl = document.getElementById("todo");
+    var addEl = document.getElementById("add");
+    var removeEl = document.getElementById("remove");
+    var highlightEl = document.getElementById("highlight");
+    var sortEl = document.getElementById("sort");
+
+    var todosContainer = document.getElementById("todos");
+
+    //Todo database: a client side buffer to hold all todos
+    var todosDB = [];
+
+    /**
+     * creates new Todo DB record
+     */ 
+    function createNewTodoRecord(todoName){
+        return {
+            id: Math.random().toString(36).slice(-6), //some random id to identify each todo item uniquely
+            name: todoName,
+            selected: false,
+            highlighted: false
+        };
+    }
+
+    /**
+     * Create a new Todo DOM Element
+     */ 
+    function createNewTodoElement(todo){
+        var liEl = document.createElement("li");
+        var checkBoxEl = document.createElement("input");
+        checkBoxEl.setAttribute("type", "checkbox");
+        liEl.appendChild(checkBoxEl);
+        var spanEl = document.createElement("span");
+        spanEl.innerHTML = todo.name;
+        liEl.appendChild(spanEl);
+        if(todo.selected){
+            checkBoxEl.checked = true;
+        }
+        if(todo.highlighted){
+            liEl.classList.add("highlighted");
+        }
+        checkBoxEl.addEventListener("change", function(e){
+            todo.selected = e.target.checked;
+        });
+        return liEl;
+    }
+
+    /**
+     * To refresh todos depending on action handlers
+     */
+    function refreshTodos(newTodos){
+        while(todosContainer.firstChild){ //removing all existing todos
+            todosContainer.removeChild(todosContainer.firstChild);
+        }
+        newTodos.forEach(function(todo){
+            todosContainer.appendChild(createNewTodoElement(todo));
+        });
+    }
+
+    //Adding Item Handler
+    addEl.addEventListener("click", function(event){
+        if(todoEl.value.length > 0){
+            var newTodoRecord = createNewTodoRecord(todoEl.value);
+            todosDB.push(newTodoRecord);
+        }
+        refreshTodos(todosDB);
+    });
+
+    //Removing Handler
+    removeEl.addEventListener("click", function(event){
+        todosDB = todosDB.filter(function(todo){
+            return !todo.selected;
+        });
+        refreshTodos(todosDB);
+    });
+
+    //Highlight Handler
+    highlightEl.addEventListener("click", function(event){
+        todosDB.forEach(function(todo){
+            if(todo.selected){
+                todo.highlighted = !todo.highlighted; //toggling the selected
+            }
+        });
+        refreshTodos(todosDB);
+    });
+
+    //Sort Handler
+    sortEl.addEventListener("click", function(event){
+        todosDB = todosDB.sort(function(todoA, todoB){
+            return todoA.name.toLowerCase().localeCompare(todoB.name.toLowerCase());
+        });
+        refreshTodos(todosDB);
+    });
+
+</script>
+</body>
+</html>
